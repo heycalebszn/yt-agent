@@ -105,7 +105,7 @@ async function saveWaveFile(
       });
 
       writer.on('finish', resolve);
-      writer.on('error', reject);
+      writer.on('error', reject); 7
 
       writer.write(pcmData);
       writer.end();

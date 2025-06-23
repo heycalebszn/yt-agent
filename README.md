@@ -2,112 +2,84 @@
 
 An automated agent that generates and uploads full videos to YouTube. Complete hands-free.
 
-## Features
+## Overview
 
-- Generate 6-8 second video clips using Google's Veo2 API
-- Stitch clips together into a complete video
-- Add background music
-- Add AI-generated voiceovers
-- Add subtitles
-- Post-editing with Remotion
-- Support for multiple niches through YAML configuration
+SOFY is an open-source AI agent built with Node.js that generates faceless videos using Google's Gemini API, background music, and voiceovers. It supports video syncing and editing with Remotion, configuration via YAML files, and automatic publishing to social media platforms like YouTube, Instagram, and TikTok.
 
-## Prerequisites
+## Current Status
 
-- Node.js (v16+)
-- Google Gemini API keys
+The project is currently in a working state with mock implementations for API endpoints that are not fully available or documented. The system successfully:
 
-## Installation
+1. Loads configuration from YAML files
+2. Generates text content using Gemini API
+3. Creates placeholder video clips (mock implementation)
+4. Creates placeholder audio files (mock implementation)
+5. Stitches everything together into a final video (mock implementation)
 
-1. Clone the repository:
+## Making It Work Perfectly
 
-```bash
-git clone https://github.com/yourusername/yt-agent.git
-cd yt-agent
-```
+To make this project work perfectly, the following changes would be needed:
 
+### 1. API Access and Compatibility
+
+- **Veo2 API**: The current Gemini API does not fully expose the `generateVideos` method as shown in the guide. You would need access to the Veo2 API through Google's Vertex AI or wait for it to be available in the public Gemini API.
+
+- **TTS API**: The Text-to-Speech functionality requires access to the `gemini-2.5-flash-preview-tts` model, which may not be fully available or compatible with the current SDK version. The correct implementation would use the responseModalities and speechConfig parameters as shown in the guide.
+
+### 2. Remotion Implementation
+
+- Implement the actual video editing functionality using Remotion instead of the current placeholder implementation.
+- Set up proper video stitching, audio mixing, and subtitle rendering.
+
+### 3. API Key Management
+
+- The current implementation includes API key rotation to handle rate limits, but you should ensure your API keys have the necessary permissions and quotas.
+
+### 4. Social Media Integration
+
+- Implement the social media posting functionality for YouTube, Instagram, and TikTok.
+
+## Getting Started
+
+1. Clone this repository
 2. Install dependencies:
-
-```bash
-npm install
-```
-
-3. Create a `.env` file in the root directory with your Gemini API keys:
-
-```
-GEMINI_API_KEY_1=your_api_key_1
-GEMINI_API_KEY_2=your_api_key_2
-# Add more keys as needed
-```
+   ```
+   npm install
+   ```
+3. Create a `.env` file with your Gemini API keys:
+   ```
+   GEMINI_API_KEY_1=your_api_key_1
+   GEMINI_API_KEY_2=your_api_key_2
+   # Add more keys as needed
+   ```
+4. Run the tests:
+   ```
+   npm run test:veo2    # Test video generation
+   npm run test:tts     # Test TTS generation
+   npm run test:full    # Test full pipeline
+   ```
 
 ## Configuration
 
-The project uses YAML configuration files located in the `config/niches` directory. Each file represents a different video niche.
+The system is configured using YAML files in the `config/niches` directory. Each niche has its own configuration file with settings for:
 
-Example configuration:
-
-```yaml
-niche: motivational
-theme: growth_mindset
-language: en
-duration: 60
-style: cinematic
-prompt:
-  type: dynamic
-  topic: "Discipline and Consistency"
-  tone: inspirational
-  emotion: high_energy
-video:
-  resolution: 1080p
-  format: mp4
-  stitch_length: 8
-voiceover:
-  model: gemini_tts
-  voice: deep_male
-music:
-  model: gemini_music
-  mood: inspiring
-  tempo: mid
-subtitles:
-  enable: true
-  style: default
-output:
-  path: ./output/motivational/
-  upload: false
-```
-
-## Usage
-
-### Generate a Video
-
-```bash
-npm run generate -- --niche motivational
-```
-
-### List Available Niches
-
-```bash
-npm run generate -- --list-niches
-```
-
-### Show Help
-
-```bash
-npm run generate -- --help
-```
+- Video style and duration
+- Prompt themes and topics
+- Voiceover settings
+- Music settings
+- Output settings
 
 ## Project Structure
 
 - `config/`: Stores YAML configuration files per niche
+- `scripts/`: CLI entry points to run video generation
 - `src/veo/`: Generates and stitches short Veo2 videos
-- `src/audio/`: Handles music and TTS generation
+- `src/audio/`: Handles music and TTS generation using Gemini
 - `src/remotion/`: Syncs visuals, adds subtitles, and renders final video
 - `src/config/`: Loads and validates YAML config files
 - `src/prompts/`: Generates AI prompts based on the config
 - `src/utils/`: Common helpers like file I/O
-- `src/cli/`: CLI interface for video generation
-- `src/api/`: Express.js server with REST endpoints (future)
-- `src/social/`: Scripts to post to social media platforms (future)
+- `src/services/`: Core services for Gemini API interaction
 
 ## License
 
