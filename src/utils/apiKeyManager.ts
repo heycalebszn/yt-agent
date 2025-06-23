@@ -3,6 +3,10 @@
  * Provides rotation functionality to avoid rate limits
  */
 
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 export class ApiKeyManager {
   private keys: string[] = [];
   private currentKeyIndex: number = 0;

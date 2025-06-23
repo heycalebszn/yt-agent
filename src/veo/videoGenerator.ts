@@ -3,16 +3,19 @@ import path from 'path';
 import { GeminiService } from '../services/geminiService';
 import { VideoConfig } from '../config/configLoader';
 import { Veo2Client, Veo2Options } from './veo2Client';
+import { PromptGenerator } from '../prompts/promptGenerator';
 
 export class VideoGenerator {
   private geminiService: GeminiService;
   private veo2Client: Veo2Client;
+  private promptGenerator: PromptGenerator;
   private config: VideoConfig;
   private outputDir: string;
   
   constructor(config: VideoConfig) {
     this.geminiService = new GeminiService();
     this.veo2Client = new Veo2Client();
+    this.promptGenerator = new PromptGenerator();
     this.config = config;
     this.outputDir = path.resolve(process.cwd(), this.config.output.path);
     
@@ -27,13 +30,13 @@ export class VideoGenerator {
    * @returns Array of paths to generated video clips
    */
   public async generateVideoClips(): Promise<string[]> {
-    const { duration, video, prompt } = this.config;
+    const { duration, video } = this.config;
     const clipLength = video.stitch_length;
     const numberOfClips = Math.ceil(duration / clipLength);
     
     console.log(`Generating ${numberOfClips} video clips of ${clipLength} seconds each`);
     
-    const videoPrompts = await this.generateVideoPrompts(numberOfClips);
+    const videoPrompts = await this.promptGenerator.generateVideoPrompts(this.config, numberOfClips);
     const videoClipPaths: string[] = [];
     
     for (let i = 0; i < numberOfClips; i++) {
@@ -77,44 +80,5 @@ export class VideoGenerator {
     fs.writeFileSync(outputPath, '');
     
     return outputPath;
-  }
-  
-  /**
-   * Generate prompts for each video clip
-   * @param numberOfClips The number of clips to generate prompts for
-   * @returns Array of prompts for each clip
-   */
-  private async generateVideoPrompts(numberOfClips: number): Promise<string[]> {
-    const { prompt, theme, style } = this.config;
-    
-    const basePrompt = `
-      Create a ${prompt.emotion} ${style} video clip about ${theme} with a focus on ${prompt.topic}.
-      The tone should be ${prompt.tone}.
-      The video should be visually appealing and suitable for a ${this.config.niche} audience.
-    `.trim();
-    
-    // For dynamic prompts, generate variations for each clip
-    if (prompt.type === 'dynamic') {
-      const promptsPrompt = `
-        I need ${numberOfClips} different video prompt variations based on the following theme:
-        "${basePrompt}"
-        
-        Each prompt should be unique but related to the main theme.
-        Format the response as a numbered list with each prompt on a new line.
-        Keep each prompt concise and specific for video generation.
-      `.trim();
-      
-      const promptsResponse = await this.geminiService.generateText(promptsPrompt);
-      
-      // Parse the response into individual prompts
-      return promptsResponse
-        .split('\n')
-        .filter(line => line.trim().match(/^\d+\./) || line.trim().match(/^-/))
-        .map(line => line.replace(/^\d+\.\s*|-\s*/, '').trim())
-        .slice(0, numberOfClips);
-    }
-    
-    // For static prompts, use the same prompt for all clips
-    return Array(numberOfClips).fill(basePrompt);
   }
 } 
