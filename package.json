@@ -10,6 +10,7 @@
     "cli": "ts-node src/scripts/cli.ts",
     "test:veo2": "ts-node src/scripts/test-veo2.ts",
     "test:tts": "ts-node src/scripts/test-tts.ts",
+    "test:full": "ts-node src/scripts/test-full.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

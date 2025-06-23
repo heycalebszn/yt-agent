@@ -191,7 +191,7 @@ await session.play();
 An automated agent that generates and uploads full videos to youtube. Complete hands-free.
 
 It uses Veo2 to create 6-8 second clips, stitches them together, adds background music, voiceover, lyrics and even handles post-editing(all programmatically.)
-
+2
 This agent should take up at-least 3000 - 4000 lines of well structured, quality, readable and scalable codebase
 
 Tools: NodeJS, Typescript, Veo2, etc.

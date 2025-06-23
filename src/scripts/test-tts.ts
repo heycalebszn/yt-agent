@@ -4,30 +4,46 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { GeminiService } from '../services/geminiService';
+import wav from 'wav';
 
 // Load environment variables
 dotenv.config();
 
 /**
- * Save audio data to a file
+ * Save wave file from audio buffer
  * @param filename Path to save the file
- * @param audioData Base64 encoded audio data
+ * @param pcmData Audio data buffer
+ * @param channels Number of audio channels
+ * @param rate Sample rate
+ * @param sampleWidth Sample width
  */
-async function saveAudioFile(filename: string, audioData: string): Promise<void> {
-  try {
-    // Convert base64 to buffer
-    const buffer = Buffer.from(audioData, 'base64');
-    
-    // Write buffer to file
-    fs.writeFileSync(filename, buffer);
-    
-    console.log(`Audio saved to ${filename}`);
-  } catch (error: any) {
-    console.error('Error saving audio file:', error.message);
-    
-    // Create an empty file as a fallback
-    fs.writeFileSync(filename, '');
-  }
+async function saveWaveFile(
+  filename: string,
+  pcmData: Buffer,
+  channels = 1,
+  rate = 24000,
+  sampleWidth = 2,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      const writer = new wav.FileWriter(filename, {
+        channels,
+        sampleRate: rate,
+        bitDepth: sampleWidth * 8,
+      });
+
+      writer.on('finish', resolve);
+      writer.on('error', reject);
+
+      writer.write(pcmData);
+      writer.end();
+    } catch (error) {
+      console.error('Error creating WAV file:', error);
+      // Create an empty file as a fallback
+      fs.writeFileSync(filename, '');
+      resolve();
+    }
+  });
 }
 
 async function testTTS() {
@@ -47,9 +63,10 @@ async function testTTS() {
     console.log(`Generating single voice TTS with text: "${singleVoiceText}"`);
     
     const singleVoiceData = await geminiService.generateSpeech(singleVoiceText, 'Kore');
+    const singleVoiceBuffer = Buffer.from(singleVoiceData, 'base64');
     const singleVoiceOutputPath = path.join(outputDir, 'single_voice.wav');
     
-    await saveAudioFile(singleVoiceOutputPath, singleVoiceData);
+    await saveWaveFile(singleVoiceOutputPath, singleVoiceBuffer);
     console.log(`Single voice TTS generated successfully! Path: ${singleVoiceOutputPath}`);
     
     // Test multi-speaker TTS
@@ -65,9 +82,10 @@ async function testTTS() {
     };
     
     const multiSpeakerData = await geminiService.generateMultiSpeakerSpeech(multiSpeakerText, speakers);
+    const multiSpeakerBuffer = Buffer.from(multiSpeakerData, 'base64');
     const multiSpeakerOutputPath = path.join(outputDir, 'multi_speaker.wav');
     
-    await saveAudioFile(multiSpeakerOutputPath, multiSpeakerData);
+    await saveWaveFile(multiSpeakerOutputPath, multiSpeakerBuffer);
     console.log(`Multi-speaker TTS generated successfully! Path: ${multiSpeakerOutputPath}`);
     
   } catch (error: any) {

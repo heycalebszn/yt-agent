@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ApiKeyManager } from '../utils/apiKeyManager';
 import { VideoConfig } from '../config/configLoader';
 import { GeminiService } from '../services/geminiService';
+import wav from 'wav';
 
 // Mock FileWriter interface instead of using wav module
 interface FileWriter {
@@ -61,25 +62,40 @@ export class AudioGenerator {
   }
   
   /**
-   * Save audio data to a file
+   * Save wave file from audio buffer
    * @param filename Path to save the file
-   * @param audioData Base64 encoded audio data
+   * @param pcmData Audio data buffer
+   * @param channels Number of audio channels
+   * @param rate Sample rate
+   * @param sampleWidth Sample width
    */
-  private async saveAudioFile(filename: string, audioData: string): Promise<void> {
-    try {
-      // Convert base64 to buffer
-      const buffer = Buffer.from(audioData, 'base64');
-      
-      // Write buffer to file
-      fs.writeFileSync(filename, buffer);
-      
-      console.log(`Audio saved to ${filename}`);
-    } catch (error: any) {
-      console.error('Error saving audio file:', error.message);
-      
-      // Create an empty file as a fallback
-      fs.writeFileSync(filename, '');
-    }
+  private async saveWaveFile(
+    filename: string,
+    pcmData: Buffer,
+    channels = 1,
+    rate = 24000,
+    sampleWidth = 2,
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        const writer = new wav.FileWriter(filename, {
+          channels,
+          sampleRate: rate,
+          bitDepth: sampleWidth * 8,
+        });
+
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+
+        writer.write(pcmData);
+        writer.end();
+      } catch (error) {
+        console.error('Error creating WAV file:', error);
+        // Create an empty file as a fallback
+        fs.writeFileSync(filename, '');
+        resolve();
+      }
+    });
   }
   
   /**
@@ -97,8 +113,11 @@ export class AudioGenerator {
       const voiceName = this.config.voiceover.voice === 'deep_male' ? 'Kore' : 'Puck';
       const audioData = await this.geminiService.generateSpeech(script, voiceName);
       
-      // Save the audio data to a file
-      await this.saveAudioFile(voiceoverPath, audioData);
+      // Convert base64 to buffer
+      const audioBuffer = Buffer.from(audioData, 'base64');
+      
+      // Save the audio buffer to a WAV file
+      await this.saveWaveFile(voiceoverPath, audioBuffer);
       
       return voiceoverPath;
     } catch (error: any) {
