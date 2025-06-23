@@ -112,3 +112,6 @@ npm run generate -- --help
 ## License
 
 ISC 
+
+npm run test:veo2  # Test video generation
+npm run test:tts   # Test speech generation 
