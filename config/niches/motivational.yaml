@@ -1,0 +1,27 @@
+niche: motivational
+theme: growth_mindset
+language: en
+duration: 60
+style: cinematic
+prompt:
+  type: dynamic
+  topic: "Discipline and Consistency"
+  tone: inspirational
+  emotion: high_energy
+video:
+  resolution: 1080p
+  format: mp4
+  stitch_length: 8
+voiceover:
+  model: gemini_tts
+  voice: deep_male
+music:
+  model: gemini_music
+  mood: inspiring
+  tempo: mid
+subtitles:
+  enable: true
+  style: default
+output:
+  path: ./output/motivational/
+  upload: false 
