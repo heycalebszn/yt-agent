@@ -75,9 +75,9 @@ export class VideoGenerator {
     // Generate the video using Veo2
     const videoPath = await this.veo2Client.generateVideo(veo2Options);
     
-    // In a real implementation, videoPath would be the actual generated video
-    // For now, create an empty file as a placeholder
-    fs.writeFileSync(outputPath, '');
+    // Copy the generated video to the output directory
+    fs.copyFileSync(videoPath, outputPath);
+    console.log(`Video copied to output directory: ${outputPath}`);
     
     return outputPath;
   }

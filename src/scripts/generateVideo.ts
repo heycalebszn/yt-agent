@@ -35,19 +35,17 @@ async function generateVideo(configPath: string): Promise<void> {
     const script = await geminiService.generateText(scriptPrompt);
     console.log('Script generated');
     
-    // Generate voiceover (mock implementation)
+    // Generate voiceover
     monitoring.updateJobStatus(jobId, JobStatus.RUNNING, JobStep.VOICEOVER_GENERATION);
     console.log('Generating voiceover...');
-    // In a real implementation, this would use the Gemini TTS API
-    const voiceoverPath = path.join(config.output.path, 'voiceover.wav');
+    const voiceoverPath = await geminiService.generateSpeech(script, config.voiceover.voice);
     console.log(`Voiceover generated: ${voiceoverPath}`);
     
-    // Generate music (mock implementation)
+    // Generate music
     monitoring.updateJobStatus(jobId, JobStatus.RUNNING, JobStep.MUSIC_GENERATION);
     console.log('Generating background music...');
     const musicPrompt = generateMusicPrompt(config);
-    // In a real implementation, this would use the Gemini Music API
-    const musicPath = path.join(config.output.path, 'music.wav');
+    const musicPath = await geminiService.generateSpeech(musicPrompt, 'music');
     console.log(`Background music generated: ${musicPath}`);
     
     // Video editing (mock implementation)
