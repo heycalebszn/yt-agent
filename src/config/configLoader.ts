@@ -1,7 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import yaml from 'yaml';
+import yaml from 'js-yaml';
 
+/**
+ * Video configuration interface
+ */
 export interface VideoConfig {
   niche: string;
   theme: string;
@@ -9,7 +12,7 @@ export interface VideoConfig {
   duration: number;
   style: string;
   prompt: {
-    type: string;
+    type: 'static' | 'dynamic';
     topic: string;
     tone: string;
     emotion: string;
@@ -38,30 +41,67 @@ export interface VideoConfig {
   };
 }
 
+/**
+ * Config loader for loading and validating video configurations
+ */
 export class ConfigLoader {
   /**
-   * Load a configuration file from the config directory
-   * @param nicheName The name of the niche configuration to load
-   * @returns The parsed configuration object
+   * List available niches based on config files
+   * @returns Array of available niche names
    */
-  public static loadConfig(nicheName: string): VideoConfig {
-    const configPath = path.join(process.cwd(), 'config', 'niches', `${nicheName}.yaml`);
-    
-    if (!fs.existsSync(configPath)) {
-      throw new Error(`Configuration file not found: ${configPath}`);
+  static listAvailableNiches(): string[] {
+    try {
+      const configs = this.getAvailableConfigs();
+      const niches = new Set<string>();
+      
+      // Load each config and extract the niche
+      for (const configFile of configs) {
+        try {
+          const config = this.loadConfig(configFile);
+          if (config.niche) {
+            niches.add(config.niche);
+          }
+        } catch (error) {
+          // Skip invalid configs
+          console.error(`Error loading config ${configFile}:`, error);
+        }
+      }
+      
+      return Array.from(niches);
+    } catch (error) {
+      console.error('Error listing niches:', error);
+      return [];
     }
-    
-    const fileContents = fs.readFileSync(configPath, 'utf8');
-    const config = yaml.parse(fileContents) as VideoConfig;
-    
-    this.validateConfig(config);
-    
-    return config;
+  }
+
+  /**
+   * Load a configuration from a YAML file
+   * @param configPath Path to the configuration file
+   * @returns Video configuration
+   */
+  public static loadConfig(configPath: string): VideoConfig {
+    try {
+      const configDir = path.resolve(process.cwd(), 'config');
+      const fullPath = path.resolve(configDir, configPath);
+      
+      if (!fs.existsSync(fullPath)) {
+        throw new Error(`Configuration file not found: ${fullPath}`);
+      }
+      
+      const configContent = fs.readFileSync(fullPath, 'utf8');
+      const config = yaml.load(configContent) as VideoConfig;
+      
+      this.validateConfig(config);
+      
+      return config;
+    } catch (error: any) {
+      throw new Error(`Error loading configuration: ${error.message}`);
+    }
   }
   
   /**
-   * Validate that the configuration has all required fields
-   * @param config The configuration object to validate
+   * Validate a configuration
+   * @param config Video configuration
    */
   private static validateConfig(config: VideoConfig): void {
     const requiredFields = [
@@ -83,21 +123,57 @@ export class ConfigLoader {
         throw new Error(`Missing required field in configuration: ${field}`);
       }
     }
+    
+    // Validate prompt
+    if (!config.prompt.type || !['static', 'dynamic'].includes(config.prompt.type)) {
+      throw new Error('Invalid prompt type: must be "static" or "dynamic"');
+    }
+    
+    if (!config.prompt.topic) {
+      throw new Error('Missing prompt topic');
+    }
+    
+    // Validate video
+    if (!config.video.resolution) {
+      throw new Error('Missing video resolution');
+    }
+    
+    if (!config.video.format) {
+      throw new Error('Missing video format');
+    }
+    
+    if (typeof config.video.stitch_length !== 'number' || config.video.stitch_length <= 0) {
+      throw new Error('Invalid video stitch length: must be a positive number');
+    }
+    
+    // Validate output
+    if (!config.output.path) {
+      throw new Error('Missing output path');
+    }
+    
+    if (typeof config.output.upload !== 'boolean') {
+      throw new Error('Invalid output upload: must be a boolean');
+    }
   }
   
   /**
-   * List all available niche configurations
-   * @returns Array of available niche names
+   * Get a list of available configurations
+   * @returns Array of configuration names
    */
-  public static listAvailableNiches(): string[] {
-    const configDir = path.join(process.cwd(), 'config', 'niches');
-    
-    if (!fs.existsSync(configDir)) {
+  public static getAvailableConfigs(): string[] {
+    try {
+      const configDir = path.resolve(process.cwd(), 'config');
+      
+      if (!fs.existsSync(configDir)) {
+        return [];
+      }
+      
+      return fs.readdirSync(configDir)
+        .filter(file => file.endsWith('.yaml') || file.endsWith('.yml'))
+        .map(file => file);
+    } catch (error) {
+      console.error('Error getting available configurations:', error);
       return [];
     }
-    
-    return fs.readdirSync(configDir)
-      .filter(file => file.endsWith('.yaml') || file.endsWith('.yml'))
-      .map(file => path.basename(file, path.extname(file)));
   }
 } 
