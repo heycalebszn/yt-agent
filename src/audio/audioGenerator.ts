@@ -112,17 +112,14 @@ export class AudioGenerator {
       try {
         // Use the Gemini TTS service to generate the voiceover
         const voiceName = this.config.voiceover.voice === 'deep_male' ? 'Kore' : 'Puck';
-        const audioData = await this.geminiService.generateSpeech(script, voiceName);
+        const generatedAudioPath = await this.geminiService.generateSpeech(script, voiceName);
         
-        // If we got actual audio data (not a mock placeholder)
-        if (audioData !== "MOCK_BASE64_AUDIO_DATA") {
-          // Convert base64 to buffer
-          const audioBuffer = Buffer.from(audioData, 'base64');
-          
-          // Save the audio buffer to a WAV file
-          await this.saveWaveFile(voiceoverPath, audioBuffer);
+        // Copy the generated audio to the output directory
+        if (fs.existsSync(generatedAudioPath)) {
+          fs.copyFileSync(generatedAudioPath, voiceoverPath);
+          console.log(`Voiceover copied to output directory: ${voiceoverPath}`);
         } else {
-          // Download a sample audio file instead
+          // Download a sample audio file as fallback
           console.log('Using sample audio file instead of empty placeholder');
           
           try {

@@ -38,6 +38,11 @@ export interface VideoConfig {
   output: {
     path: string;
     upload: boolean;
+    title?: string;
+    description?: string;
+    tags?: string[];
+    category_id?: number;
+    privacy_status?: 'public' | 'unlisted' | 'private';
   };
 }
 

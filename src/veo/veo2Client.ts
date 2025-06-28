@@ -44,9 +44,21 @@ export class Veo2Client {
       const filename = `video_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${options.format}`;
       const outputPath = path.join(tempDir, filename);
       
-      // Download a sample video instead of generating one
-      // This is just for demonstration purposes
-      const sampleVideoUrl = 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+      // Use different sample videos to create variety
+      const sampleVideos = [
+        'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+        'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+        'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+        'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+        'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+        'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerResolutions.mp4',
+        'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+        'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4'
+      ];
+      
+      // Select a random sample video to create variety
+      const randomIndex = Math.floor(Math.random() * sampleVideos.length);
+      const sampleVideoUrl = sampleVideos[randomIndex];
       
       console.log(`Downloading sample video from ${sampleVideoUrl}`);
       

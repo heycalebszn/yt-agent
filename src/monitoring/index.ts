@@ -1,6 +1,7 @@
 export * from './jobTracker';
 export * from './logger';
 export * from './analytics';
+export * from './dashboard';
 
 import { JobTracker, JobInfo, JobStatus, JobStep } from './jobTracker';
 import { Logger, LogLevel } from './logger';

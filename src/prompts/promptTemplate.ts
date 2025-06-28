@@ -83,13 +83,38 @@ export class MotivationalPromptTemplate extends BasePromptTemplate {
       
       `Time-lapse transformation: A visual metaphor using a time-lapse of a seed growing into a mighty tree, intercut with a person consistently practicing a skill over months, emphasizing gradual, consistent effort yielding magnificent growth.`,
       
-      `"Small Wins Big": Rapid-fire montage of seemingly small, consistent actions (e.g., one push-up, one page read, one line of code) accumulating into massive, visually impressive results.`
+      `"Small Wins Big": Rapid-fire montage of seemingly small, consistent actions (e.g., one push-up, one page read, one line of code) accumulating into massive, visually impressive results.`,
+      
+      `Cinematic ${style} journey: From first light to nightfall, diverse individuals embrace the grind - physical training, focused learning, dedicated crafting. Consistency builds to an epic, inspiring sunrise.`,
+      
+      `Electric ${style} montage: From sunrise's promise to sunset's reflection, watch diverse individuals embrace discipline through rigorous exercise, dedicated study, and intricate craft, building to a powerful, symbolic dawn.`,
+      
+      `Energetic, ${style} sequence: Diverse individuals push through challenging workouts, demanding study sessions, and intricate craft projects, each disciplined effort building towards a magnificent, inspirational sunrise of progress.`,
+      
+      `High-octane visual journey: Witness the power of discipline as individuals conquer challenging routines - fitness, learning, creative pursuits - from dawn till dusk, culminating in a radiant sunrise of potential.`,
+      
+      `Cinematic time-lapse: A diverse group commits to daily discipline - exercise, study, craft - each repetition a step closer to a glorious, metaphorical sunrise of self-mastery.`,
+      
+      `Dynamic, motivational montage: From first light to nightfall, diverse individuals push their limits - exercise, study, artistic creation - each small victory fueling the next, culminating in a powerful sunrise of achievement.`,
+      
+      `Fast-paced, inspiring montage: Individuals from all walks of life push their limits - exercise, study, artistic creation - each small victory fueling the next, culminating in a powerful sunrise of achievement.`,
+      
+      `High-energy cinematic montage: Dawn 'til dusk - diverse faces conquering tough workouts, intense study sessions, intricate crafts. Disciplined repetition builds to a breathtaking sunrise, symbolizing growth mindset.`,
+      
+      `Inspiring montage: The daily grind - workouts, studies, creative endeavors - fuels unstoppable momentum. Diverse individuals push boundaries, building towards a stunning sunrise of personal growth.`,
+      
+      `Epic ${style} transformation: Watch as ordinary people become extraordinary through the power of consistent, daily discipline - each small action building towards a magnificent breakthrough moment.`
     ];
     
-    // Return the requested number of templates, cycling through if needed
+    // Shuffle the templates to ensure variety
+    const shuffledTemplates = [...templates].sort(() => Math.random() - 0.5);
+    
+    // Return the requested number of templates, ensuring variety
     const result: string[] = [];
     for (let i = 0; i < count; i++) {
-      result.push(templates[i % templates.length]);
+      // Use modulo to cycle through shuffled templates, but add some randomization
+      const templateIndex = (i + Math.floor(Math.random() * 3)) % shuffledTemplates.length;
+      result.push(shuffledTemplates[templateIndex]);
     }
     
     return result;

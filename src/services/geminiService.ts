@@ -114,7 +114,7 @@ export class GeminiService {
     console.log(`Mock TTS generation for text: "${text.substring(0, 50)}..." with voice: ${voiceName}`);
     
     try {
-      // This is a mock implementation since the TTS API is not fully available
+      // This is a mock implementation since the TTS API format is not clear
       // In a real implementation, this would use the Gemini TTS API
       
       // Create a temporary directory for the audio

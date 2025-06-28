@@ -9,7 +9,7 @@ import { GeminiService } from '../services/geminiService';
  * Main function to generate a video
  * @param configPath Path to the configuration file
  */
-async function generateVideo(configPath: string): Promise<void> {
+export async function generateVideo(configPath: string): Promise<void> {
   const monitoring = MonitoringService.getInstance();
   const geminiService = new GeminiService();
   
