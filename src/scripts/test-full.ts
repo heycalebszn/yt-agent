@@ -12,7 +12,7 @@ async function testFullVideoGeneration() {
     console.log('Testing full video generation process...');
     
     // Load the motivational configuration
-    const config = ConfigLoader.loadConfig('motivational');
+    const config = ConfigLoader.loadConfig('motivational.yaml');
     
     // Create the video orchestrator
     const orchestrator = new VideoOrchestratorService(config);
