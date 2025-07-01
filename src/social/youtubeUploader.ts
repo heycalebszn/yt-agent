@@ -44,7 +44,7 @@ export class YouTubeUploader {
   }
   
   /**
-   * Upload a video to YouTube
+   * Upload a video to YouTube as a Short
    * @param videoPath Path to the video file
    * @returns YouTube video URL
    */
@@ -54,8 +54,8 @@ export class YouTubeUploader {
       return '';
     }
     
-    console.log(`Uploading video to YouTube: ${videoPath}`);
-    this.monitoring.log(LogLevel.INFO, `Starting YouTube upload: ${videoPath}`);
+    console.log(`Uploading video to YouTube Shorts: ${videoPath}`);
+    this.monitoring.log(LogLevel.INFO, `Starting YouTube Shorts upload: ${videoPath}`);
     
     try {
       // Verify the video file exists
@@ -74,20 +74,10 @@ export class YouTubeUploader {
         auth
       });
       
-      // Generate video metadata
-      const title = this.config.output.title || 
-        `${this.config.prompt.topic} - ${this.config.theme} | #shorts`;
-      
-      const description = this.config.output.description || 
-        `A ${this.config.style} video about ${this.config.theme} with a focus on ${this.config.prompt.topic}. #shorts`;
-      
-      const tags = this.config.output.tags || [
-        this.config.niche,
-        this.config.theme,
-        this.config.prompt.topic,
-        'shorts',
-        'motivation',
-      ];
+      // Generate video metadata optimized for YouTube Shorts
+      const title = this.generateShortsTitle();
+      const description = this.generateShortsDescription();
+      const tags = this.generateShortsTags();
       
       const categoryId = this.config.output.category_id || 
         parseInt(process.env.YOUTUBE_DEFAULT_CATEGORY_ID || '22'); // 22 = People & Blogs
@@ -96,7 +86,7 @@ export class YouTubeUploader {
         (process.env.YOUTUBE_DEFAULT_PRIVACY_STATUS as 'public' | 'unlisted' | 'private') || 
         'public';
       
-      console.log('Video metadata:');
+      console.log('YouTube Shorts metadata:');
       console.log(`- Title: ${title}`);
       console.log(`- Description: ${description}`);
       console.log(`- Tags: ${tags.join(', ')}`);
@@ -129,12 +119,101 @@ export class YouTubeUploader {
       }
       
       const videoUrl = `https://youtube.com/shorts/${videoId}`;
-      this.monitoring.log(LogLevel.INFO, `YouTube upload successful: ${videoUrl}`);
+      this.monitoring.log(LogLevel.INFO, `YouTube Shorts upload successful: ${videoUrl}`);
       
       return videoUrl;
     } catch (error: any) {
-      this.monitoring.log(LogLevel.ERROR, `YouTube upload failed: ${error.message}`);
+      this.monitoring.log(LogLevel.ERROR, `YouTube Shorts upload failed: ${error.message}`);
       throw error;
     }
+  }
+  
+  /**
+   * Generate a title optimized for YouTube Shorts
+   * @returns Optimized title
+   */
+  private generateShortsTitle(): string {
+    if (this.config.output.title) {
+      return this.config.output.title;
+    }
+    
+    // Generate a title based on the content
+    const topic = this.config.prompt.topic;
+    const theme = this.config.theme;
+    
+    // Ensure #shorts is included
+    let title = `${topic} - ${theme} | #shorts`;
+    
+    // Add motivational elements for better engagement
+    const motivationalPhrases = [
+      'Transform Your Life',
+      'Unlock Your Potential',
+      'Master Your Mindset',
+      'Achieve Your Dreams',
+      'Build Your Future'
+    ];
+    
+    const randomPhrase = motivationalPhrases[Math.floor(Math.random() * motivationalPhrases.length)];
+    title = `${randomPhrase} | ${topic} #shorts`;
+    
+    return title;
+  }
+  
+  /**
+   * Generate a description optimized for YouTube Shorts
+   * @returns Optimized description
+   */
+  private generateShortsDescription(): string {
+    if (this.config.output.description) {
+      return this.config.output.description;
+    }
+    
+    const topic = this.config.prompt.topic;
+    const theme = this.config.theme;
+    
+    // Create an engaging description for Shorts
+    let description = `Transform your life through ${topic.toLowerCase()}. `;
+    description += `This ${theme} video will inspire you to take action and achieve your goals. `;
+    description += `\n\n#shorts #motivation #${theme.toLowerCase().replace('_', '')} #${topic.toLowerCase().replace(' ', '')} #inspiration #growth #mindset`;
+    
+    return description;
+  }
+  
+  /**
+   * Generate tags optimized for YouTube Shorts
+   * @returns Array of optimized tags
+   */
+  private generateShortsTags(): string[] {
+    if (this.config.output.tags && this.config.output.tags.length > 0) {
+      return this.config.output.tags;
+    }
+    
+    // Generate tags based on content
+    const baseTags = [
+      'shorts',
+      'motivation',
+      'inspiration',
+      this.config.niche,
+      this.config.theme,
+      this.config.prompt.topic.toLowerCase().replace(' ', ''),
+      'growth',
+      'mindset',
+      'success',
+      'personal development'
+    ];
+    
+    // Add trending tags for better discoverability
+    const trendingTags = [
+      'motivational',
+      'inspirational',
+      'self improvement',
+      'goal setting',
+      'discipline',
+      'consistency',
+      'achievement',
+      'success mindset'
+    ];
+    
+    return [...baseTags, ...trendingTags];
   }
 } 

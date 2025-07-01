@@ -35,6 +35,8 @@ export class VideoGenerator {
     const numberOfClips = Math.ceil(duration / clipLength);
     
     console.log(`Generating ${numberOfClips} video clips of ${clipLength} seconds each`);
+    console.log(`Video format: ${video.format}, Resolution: ${video.resolution}`);
+    console.log(`Aspect ratio: 9:16 (YouTube Shorts format)`);
     
     const videoPrompts = await this.promptGenerator.generateVideoPrompts(this.config, numberOfClips);
     const videoClipPaths: string[] = [];
@@ -64,12 +66,13 @@ export class VideoGenerator {
   private async generateSingleClip(prompt: string, index: number): Promise<string> {
     const outputPath = path.join(this.outputDir, `clip_${index + 1}.mp4`);
     
-    // Configure Veo2 options
+    // Configure Veo2 options for YouTube Shorts
     const veo2Options: Veo2Options = {
       prompt,
       duration: this.config.video.stitch_length,
       resolution: this.config.video.resolution,
       format: this.config.video.format,
+      aspectRatio: '9:16', // YouTube Shorts format
     };
     
     // Generate the video using Veo2
@@ -77,7 +80,7 @@ export class VideoGenerator {
     
     // Copy the generated video to the output directory
     fs.copyFileSync(videoPath, outputPath);
-    console.log(`Video copied to output directory: ${outputPath}`);
+    console.log(`Video clip ${index + 1} saved to: ${outputPath}`);
     
     return outputPath;
   }

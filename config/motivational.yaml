@@ -9,7 +9,7 @@ prompt:
   tone: inspirational
   emotion: high_energy
 video:
-  resolution: 1080p
+  resolution: 1080x1920  # YouTube Shorts resolution (9:16 aspect ratio)
   format: mp4
   stitch_length: 8
 voiceover:
@@ -24,4 +24,9 @@ subtitles:
   style: default
 output:
   path: ./output/motivational/
-  upload: false 
+  upload: true
+  title: "Discipline and Consistency - Motivational Short #shorts"
+  description: "Transform your life through discipline and consistency. Every small step counts towards your goals. #motivation #discipline #consistency #shorts #growth"
+  tags: ["motivation", "discipline", "consistency", "growth", "shorts", "inspiration"]
+  category_id: 22
+  privacy_status: public 

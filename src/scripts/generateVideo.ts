@@ -1,6 +1,7 @@
 import path from 'path';
 import { ConfigLoader, VideoConfig } from '../config/configLoader';
 import { VideoGenerator } from '../veo/videoGenerator';
+import { VideoStitcher } from '../veo/videoStitcher';
 import { MonitoringService, JobStatus, JobStep, LogLevel } from '../monitoring';
 import { generateScriptPrompt, generateMusicPrompt } from '../prompts';
 import { GeminiService } from '../services/geminiService';
@@ -23,10 +24,26 @@ export async function generateVideo(configPath: string): Promise<void> {
     
     // Generate video clips
     monitoring.updateJobStatus(jobId, JobStatus.RUNNING, JobStep.VIDEO_GENERATION);
-    console.log('Generating video clips...');
+    console.log('Generating video clips for YouTube Shorts...');
     const videoGenerator = new VideoGenerator(config);
     const videoClips = await videoGenerator.generateVideoClips();
     console.log(`Generated ${videoClips.length} video clips`);
+    
+    // Stitch video clips into final YouTube Shorts video
+    monitoring.updateJobStatus(jobId, JobStatus.RUNNING, JobStep.VIDEO_EDITING);
+    console.log('Stitching video clips into YouTube Shorts format...');
+    const videoStitcher = new VideoStitcher(config);
+    const finalVideoPath = await videoStitcher.stitchClips(videoClips);
+    
+    // Validate the final video for YouTube Shorts
+    const isValidShorts = await videoStitcher.validateShortsFormat(finalVideoPath);
+    if (!isValidShorts) {
+      throw new Error('Generated video does not meet YouTube Shorts requirements');
+    }
+    
+    // Get video metadata
+    const videoMetadata = await videoStitcher.getVideoMetadata(finalVideoPath);
+    console.log(`Final YouTube Shorts video: ${videoMetadata.sizeMB}MB`);
     
     // Generate script
     monitoring.updateJobStatus(jobId, JobStatus.RUNNING, JobStep.SCRIPT_GENERATION);
@@ -48,31 +65,24 @@ export async function generateVideo(configPath: string): Promise<void> {
     const musicPath = await geminiService.generateSpeech(musicPrompt, 'music');
     console.log(`Background music generated: ${musicPath}`);
     
-    // Video editing (mock implementation)
-    monitoring.updateJobStatus(jobId, JobStatus.RUNNING, JobStep.VIDEO_EDITING);
-    console.log('Editing video...');
-    // In a real implementation, this would use Remotion or another video editing library
-    const outputPath = path.join(config.output.path, 'final_video.mp4');
-    console.log(`Video editing completed: ${outputPath}`);
-    
-    // Final render (mock implementation)
+    // Final render (mock implementation for now)
     monitoring.updateJobStatus(jobId, JobStatus.RUNNING, JobStep.FINAL_RENDER);
-    console.log('Rendering final video...');
-    // In a real implementation, this would render the final video
-    console.log(`Final video rendered: ${outputPath}`);
+    console.log('Rendering final YouTube Shorts video...');
+    // In a real implementation, this would combine video, voiceover, and music
+    console.log(`Final YouTube Shorts video rendered: ${finalVideoPath}`);
     
     // Update job status to completed
-    monitoring.setJobOutput(jobId, outputPath);
+    monitoring.setJobOutput(jobId, finalVideoPath);
     monitoring.updateJobStatus(jobId, JobStatus.COMPLETED);
-    console.log('Video generation completed successfully');
+    console.log('YouTube Shorts video generation completed successfully');
     
     // Generate analytics report
     const report = monitoring.generateAnalyticsReport();
     console.log('\nAnalytics Report:');
     console.log(report);
   } catch (error: any) {
-    console.error('Error generating video:', error.message);
-    monitoring.log(LogLevel.ERROR, `Error generating video: ${error.message}`);
+    console.error('Error generating YouTube Shorts video:', error.message);
+    monitoring.log(LogLevel.ERROR, `Error generating YouTube Shorts video: ${error.message}`);
   }
 }
 
@@ -90,10 +100,10 @@ if (require.main === module) {
   
   generateVideo(configPath)
     .then(() => {
-      console.log('Video generation script completed');
+      console.log('YouTube Shorts video generation script completed');
     })
     .catch((error) => {
-      console.error('Error running video generation script:', error);
+      console.error('Error running YouTube Shorts video generation script:', error);
       process.exit(1);
     });
 } 
