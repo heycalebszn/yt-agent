@@ -42,7 +42,7 @@ The project is currently in development with the following components implemente
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/sofy.git
+git clone https://github.com/heyrapto/sofy.git
 cd sofy
 
 # Install dependencies
